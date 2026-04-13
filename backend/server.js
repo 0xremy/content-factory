@@ -21,8 +21,7 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/x-cms';
 mongoose.connect(MONGO_URI)
   .then(() => console.log('🚀 MongoDB connected successfully'))
   .catch(err => {
-    console.error('❌ MongoDB connection error:', err);
-    process.exit(1);
+    console.error('❌ MongoDB connection error: Server will start without DB connection. Some features may be unavailable.', err);
   });
 
 // Health Check Route
