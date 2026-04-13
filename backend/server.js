@@ -8,7 +8,12 @@ const app = express();
 
 // Middleware
 app.use(helmet()); // Security headers
-app.use(cors()); // Enable CORS for frontend access
+app.use(cors({
+  origin: ['https://frontend-five-phi-wdifrhj1u3.vercel.app', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 app.use(express.json()); // Parse JSON bodies
 
 // MongoDB Connection
