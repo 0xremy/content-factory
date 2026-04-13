@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import api from '../api';
 
 const LoginPage = ({ onLogin }) => {
   const [password, setPassword] = useState('');
@@ -9,21 +10,10 @@ const LoginPage = ({ onLogin }) => {
     setError('');
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        onLogin(data.token);
-      } else {
-        const data = await response.json();
-        setError(data.error || 'Invalid password');
-      }
+      const response = await api.post('/auth/login', { password });
+      onLogin(response.data.token);
     } catch (err) {
-      setError('An error occurred during login');
+      setError(err.response?.data?.error || 'An error occurred during login');
     }
   };
 
