@@ -1,3 +1,4 @@
+console.log('🚀 PROFESUI SERVER IS STARTING UP...');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -16,7 +17,14 @@ app.use(cors({
 }));
 app.use(express.json()); // Parse JSON bodies
 
-// MongoDB Connection
+// Prioritize Port Binding for Render Port Scan
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`\n🌐 Server running on http://localhost:${PORT}`);
+  console.log(`🛠️  Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// MongoDB Connection (Now called AFTER app.listen to prevent blocking startup)
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/x-cms';
 mongoose.connect(MONGO_URI)
   .then(() => console.log('🚀 MongoDB connected successfully'))
@@ -44,10 +52,4 @@ app.use('/api/posts', require('./routes/postRoutes'));
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong on the server' });
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`\n🌐 Server running on http://localhost:${PORT}`);
-  console.log(`🛠️  Environment: ${process.env.NODE_ENV || 'development'}`);
 });
