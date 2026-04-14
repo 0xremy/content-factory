@@ -1,4 +1,20 @@
-const Post = require('../models/Post');
+exports.getPosts = async (req, res) => {
+  try {
+    const posts = await Post.find({}).sort({ createdAt: -1 });
+    res.status(200).json({
+      success: true,
+      data: posts,
+    });
+  } catch (error) {
+    console.error('GetPosts Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error fetching posts.',
+      error: error.message,
+    });
+  }
+};
+
 const EditLog = require('../models/EditLog');
 const Feedback = require('../models/Feedback');
 const { publishThread } = require('../services/threadingEngine');

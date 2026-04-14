@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const postController = require('../controllers/postController');
 
+router.get('/', postController.getPosts);
 router.post('/ingest', postController.ingestPost);
 router.post('/:postId/publish', postController.publishPost);
 router.get('/:postId/analytics', postController.getAnalytics);
