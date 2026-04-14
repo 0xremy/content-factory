@@ -1,0 +1,3 @@
+{
+  "content": "# MongoDB Connection\nMONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/profesui?retryWrites=true&w=majority\n\n# Server Configuration\nPORT=5000\nNODE_ENV=production\n\n# X (Twitter) API Credentials\nX_API_KEY=your_api_key\nX_API_SECRET=your_api_secret\nX_ACCESS_TOKEN=your_access_token\nX_ACCESS_SECRET=your_access_secret\nX_BEARER_TOKEN=your_bearer_token\n\n# Dashboard Auth\nDASHBOARD_PASSWORD=Profesui_Secure_2026!\nJWT_SECRET=supersecretkey123\n"
+}

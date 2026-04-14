@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "x-api": {
+      "version": "0.1.0",
+      "installedAt": 1774973882003
+    },
+    "x-automation": {
+      "version": "1.0.0",
+      "installedAt": 1774977200766
+    },
+    "x-search": {
+      "version": "1.0.0",
+      "installedAt": 1775037888267
+    },
+    "self-improving": {
+      "version": "1.2.16",
+      "installedAt": 1775037914629
+    },
+    "claudecode-websearch": {
+      "version": "1.0.0",
+      "installedAt": 1775037963836
+    },
+    "memory-compression-system": {
+      "version": "3.0.1",
+      "installedAt": 1775038022389
+    },
+    "openclaw-smart-router": {
+      "version": "1.0.0",
+      "installedAt": 1775038069666
+    },
+    "token-optimizer-pro": {
+      "version": "1.0.1",
+      "installedAt": 1775038098892
+    },
+    "qmd": {
+      "version": "1.0.0",
+      "installedAt": 1775038653535
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "build": {
+    "env": {
+      "REACT_APP_API_URL": "https://profesui-backend.onrender.com/api"
+    }
+  },
+  "buildCommand": "npm run build",
+  "outputDirectory": "build"
+}
