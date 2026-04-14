@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'https://content-factory-68ch.onrender.com';
+const API_BASE = process.env.REACT_APP_API_URL || 'https://content-factory-68ch.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_BASE,

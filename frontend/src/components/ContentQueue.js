@@ -17,12 +17,12 @@ const ContentQueue = () => {
       const response = await api.get('/api/posts');
       console.log('API Response:', response.data);
       // DEBUG MODE: In thẳng dữ liệu ra màn hình để kiểm tra
-      if (response.data && response.data.length > 0) {
-         alert('API Success! Found ' + response.data.length + ' posts. Check console for details.');
+      if (response.data && response.data.data && response.data.data.length > 0) {
+         alert('API Success! Found ' + response.data.data.length + ' posts. Check console for details.');
       } else {
          alert('API returned empty array or invalid data');
       }
-      setPosts(response.data.filter(p => p.status !== 'published'));
+      setPosts(response.data.data.filter(p => p.status !== 'published'));
     } catch (error) {
       console.error('Error fetching posts:', error);
       alert('API Error: ' + (error.response?.data?.error || error.message));
