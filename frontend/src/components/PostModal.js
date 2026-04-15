@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, RotateCcw, Ban, Link2, Trash2 } from 'lucide-react';
+import { X, Check, RotateCcw, Ban, Link2, Trash2, Merge, Split, Copy } from 'lucide-react';
 import usePostStore from '../store/usePostStore';
 import StatusBadge from './StatusBadge';
 import ThreadDisplay from './ThreadDisplay';
@@ -10,6 +10,8 @@ const PostModal = () => {
   const { selectedPost, clearSelection, approvePost, rejectPost, redoPost, addComment, markPublished, deletePost } = usePostStore();
   const [publishUrl, setPublishUrl] = useState('');
   const [actionLoading, setActionLoading] = useState('');
+  const [viewMode, setViewMode] = useState('split'); // 'split' or 'merge'
+  const [allCopied, setAllCopied] = useState(false);
 
   useEffect(() => {
     if (selectedPost) {
@@ -23,6 +25,8 @@ const PostModal = () => {
   if (!selectedPost) return null;
 
   const post = selectedPost;
+  const thread = post.thread || post.content || [];
+  const images = post.images || [];
 
   const handleAction = async (action, ...args) => {
     setActionLoading(action);
@@ -48,6 +52,24 @@ const PostModal = () => {
     addComment(post._id, text, selection);
   };
 
+  const handleCopyAll = async () => {
+    const fullText = thread.join('\n\n');
+    try {
+      await navigator.clipboard.writeText(fullText);
+      setAllCopied(true);
+      setTimeout(() => setAllCopied(false), 2000);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = fullText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setAllCopied(true);
+      setTimeout(() => setAllCopied(false), 2000);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-40 flex items-start justify-center animate-fade-in">
       {/* Backdrop */}
@@ -63,9 +85,46 @@ const PostModal = () => {
             <StatusBadge status={post.status} size="lg" />
             <span className="text-xs text-dark-500 font-mono shrink-0">v{post.version}</span>
           </div>
-          <button onClick={clearSelection} className="p-2 text-dark-400 hover:text-white hover:bg-dark-800 rounded-xl transition-all">
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Merge / Split Toggle */}
+            <div className="flex items-center bg-dark-800 rounded-xl p-1 border border-dark-700/50">
+              <button
+                onClick={() => setViewMode('split')}
+                title="Split View — Individual tweets with images"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  viewMode === 'split' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'
+                }`}
+              >
+                <Split size={14} /> Split
+              </button>
+              <button
+                onClick={() => setViewMode('merge')}
+                title="Merge View — Single article with first image"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  viewMode === 'merge' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'
+                }`}
+              >
+                <Merge size={14} /> Merge
+              </button>
+            </div>
+
+            {/* Copy All */}
+            <button
+              onClick={handleCopyAll}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all border ${
+                allCopied
+                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                  : 'bg-dark-800 text-dark-400 hover:text-white border-dark-700/50 hover:bg-dark-700'
+              }`}
+            >
+              {allCopied ? <Check size={14} /> : <Copy size={14} />}
+              {allCopied ? 'Copied!' : 'Copy All'}
+            </button>
+
+            <button onClick={clearSelection} className="p-2 text-dark-400 hover:text-white hover:bg-dark-800 rounded-xl transition-all">
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
@@ -73,7 +132,9 @@ const PostModal = () => {
           {/* Left: Thread */}
           <div className="flex-1 overflow-y-auto p-6">
             <ThreadDisplay
-              thread={post.thread || post.content || []}
+              thread={thread}
+              images={images}
+              viewMode={viewMode}
               onHighlightComment={handleHighlightComment}
             />
           </div>

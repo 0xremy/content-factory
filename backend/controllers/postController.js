@@ -53,7 +53,7 @@ exports.getPost = async (req, res) => {
 // ─── Create Post (used by OpenClaw) ────────────────────────────────────────
 exports.createPost = async (req, res) => {
   try {
-    const { title, thread, status } = req.body;
+    const { title, thread, images, status } = req.body;
 
     if (!title || !thread || !Array.isArray(thread) || thread.length === 0) {
       return res.status(400).json({
@@ -65,6 +65,7 @@ exports.createPost = async (req, res) => {
     const post = await Post.create({
       title,
       thread,
+      images: Array.isArray(images) ? images : [],
       status: status || 'review',
       version: 1,
     });
@@ -82,13 +83,14 @@ exports.updatePost = async (req, res) => {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ success: false, message: 'Post not found.' });
 
-    const { title, thread, status } = req.body;
+    const { title, thread, images, status } = req.body;
 
     if (title !== undefined) post.title = title;
     if (thread !== undefined) {
       post.thread = thread;
       post.version += 1;
     }
+    if (images !== undefined) post.images = images;
     if (status !== undefined) post.status = status;
 
     await post.save();

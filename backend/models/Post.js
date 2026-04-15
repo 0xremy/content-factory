@@ -15,6 +15,10 @@ const PostSchema = new mongoose.Schema({
     type: [String],
     required: [true, 'Thread content array is required'],
   },
+  images: {
+    type: [String], // Array of image URLs, one per tweet (empty string if no image)
+    default: [],
+  },
   status: {
     type: String,
     enum: ['draft', 'review', 'approved', 'published', 'redo', 'rejected'],

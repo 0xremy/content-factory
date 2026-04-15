@@ -24,16 +24,30 @@ Content-Type: application/json
     "First tweet of the thread. Keep under 280 characters.",
     "Second tweet continues the narrative...",
     "Third tweet wraps up with a CTA or insight."
+  ],
+  "images": [
+    "https://example.com/image-for-tweet-1.jpg",
+    "",
+    "https://example.com/image-for-tweet-3.jpg"
   ]
 }
 ```
 
+### Fields:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `title` | String | ✅ | Internal name for management (not published) |
+| `thread` | String[] | ✅ | Array of tweet strings, each ≤ 280 chars |
+| `images` | String[] | ❌ | Array of image URLs, parallel to `thread`. Use `""` for tweets without images |
+
 ### Rules for Creating:
-- `title` — Short, descriptive name for internal management (e.g., "Pharos Network Analysis Thread")
-- `thread` — Array of strings, each one is a single tweet
 - Each tweet **MUST** be ≤ 280 characters
 - Thread length: **3 to 8 tweets** (ideal: 5-6)
-- Status is automatically set to `"review"` — the admin will see it on the dashboard
+- `images` array should have the same length as `thread`
+- Use empty string `""` for tweets that have no image
+- If no images at all, you can omit the `images` field entirely
+- Status is automatically set to `"review"`
 
 ### Response:
 ```json
@@ -43,6 +57,7 @@ Content-Type: application/json
     "_id": "664a1b2c3d4e5f6a7b8c9d0e",
     "title": "Pharos Network Analysis Thread",
     "thread": ["...", "..."],
+    "images": ["https://...", "", "https://..."],
     "status": "review",
     "version": 1,
     "comments": [],
@@ -53,7 +68,42 @@ Content-Type: application/json
 
 ---
 
-## 🔄 2. Checking for Redo Requests
+## 🖼️ 2. Image Guidelines
+
+### How Images Appear in the Dashboard:
+
+**Split View** (default): Each tweet shows its own image below the text.
+
+**Merge View**: All tweets are combined into one article. Only the **first image** from the array is displayed as the main article image.
+
+### Image URL Requirements:
+- Must be a publicly accessible URL (no auth required)
+- Recommended formats: `.jpg`, `.png`, `.webp`
+- Recommended size: 1200×675px (16:9 ratio for Twitter)
+- URLs should be stable (not temporary/expiring links)
+
+### Example — Thread with Mixed Images:
+```json
+{
+  "title": "DeFi Analysis",
+  "thread": [
+    "🧵 Breaking down the latest DeFi trends...",
+    "1/ Total TVL has reached $180B across all chains",
+    "2/ Ethereum still leads with 58% market share",
+    "3/ Here's the growth chart for Q1 2026"
+  ],
+  "images": [
+    "https://example.com/defi-cover.jpg",
+    "",
+    "",
+    "https://example.com/growth-chart.png"
+  ]
+}
+```
+
+---
+
+## 🔄 3. Checking for Redo Requests
 
 The admin may request a rewrite by marking a post as `"redo"`. You **must** poll for these periodically.
 
@@ -63,33 +113,17 @@ The admin may request a rewrite by marking a post as `"redo"`. You **must** poll
 GET /posts?status=redo
 ```
 
-### Response (when redo posts exist):
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "_id": "664a1b2c3d4e5f6a7b8c9d0e",
-      "title": "Pharos Network Analysis Thread",
-      "status": "redo",
-      "version": 1,
-      "comments": [...]
-    }
-  ]
-}
-```
-
 ### If posts are found, fetch full details:
 
 ```http
-GET /posts/664a1b2c3d4e5f6a7b8c9d0e
+GET /posts/{postId}
 ```
 
 ---
 
-## 💬 3. Reading Admin Feedback
+## 💬 4. Reading Admin Feedback
 
-The `comments` array contains the admin's feedback. Each comment has:
+The `comments` array contains the admin's feedback:
 
 ```json
 {
@@ -100,7 +134,7 @@ The `comments` array contains the admin's feedback. Each comment has:
       "createdAt": "2026-04-15T10:15:00.000Z"
     },
     {
-      "text": "Good hook but make it more urgent",
+      "text": "Replace this image with a chart",
       "selection": "",
       "createdAt": "2026-04-15T10:16:00.000Z"
     }
@@ -113,55 +147,60 @@ The `comments` array contains the admin's feedback. Each comment has:
 | Field | Meaning |
 |---|---|
 | `comment.text` | The admin's instruction — what they want changed |
-| `comment.selection` | The specific text the admin highlighted in the thread. If empty, it's a general comment |
-| `comment.createdAt` | When the comment was made |
+| `comment.selection` | The specific text the admin highlighted. If empty, it's a general comment |
 
 ### Critical Rules:
 1. **Read ALL comments** — do not skip any
-2. If `selection` is present → the admin highlighted that exact text → **fix that specific part**
-3. If `selection` is empty → it's a general instruction → apply it to the overall thread
-4. Comments are **never deleted** — they persist across versions so you can see the full history
+2. If `selection` is present → fix that specific part
+3. If `selection` is empty → it's a general instruction
+4. Comments persist across versions — you see the full history
 
 ---
 
-## ✏️ 4. Rewriting and Resubmitting
+## ✏️ 5. Rewriting and Resubmitting
 
-After reading the feedback, rewrite the thread and submit:
+After reading feedback, rewrite and submit:
 
 ```http
-PATCH /posts/664a1b2c3d4e5f6a7b8c9d0e
+PATCH /posts/{postId}
 Content-Type: application/json
 
 {
   "thread": [
-    "Rewritten tweet 1 addressing the feedback...",
+    "Rewritten tweet 1...",
     "Improved tweet 2 with specific numbers...",
-    "Updated tweet 3 with stronger CTA..."
+    "Updated tweet 3..."
+  ],
+  "images": [
+    "https://example.com/new-cover.jpg",
+    "",
+    "https://example.com/updated-chart.png"
   ],
   "status": "review"
 }
 ```
 
 ### What happens:
-- `version` automatically increments (1 → 2 → 3...)
+- `version` automatically increments
 - `status` changes from `"redo"` back to `"review"`
-- The admin sees the updated version on dashboard
 - All previous comments remain visible
-- The admin may approve, request another redo, or reject
+- You can update both `thread` and `images` in the same request
 
 ---
 
-## 🔁 5. Complete Workflow Loop
+## 🔁 6. Complete Workflow Loop
 
 ```
 ┌─────────────────────────────────────────────────┐
 │                                                 │
 │   OpenClaw creates post                         │
-│   POST /posts { title, thread }                 │
+│   POST /posts { title, thread, images }         │
 │              ↓                                  │
 │        status = "review"                        │
 │              ↓                                  │
 │   Admin reviews on Dashboard                    │
+│   (Split View = tweets + images)                │
+│   (Merge View = article + first image)          │
 │              ↓                                  │
 │   ┌─────────┼──────────┐                        │
 │   │         │          │                        │
@@ -174,7 +213,7 @@ Content-Type: application/json
 │ Admin      OpenClaw reads                       │
 │ posts      comments & rewrites                  │
 │ to X       PATCH /posts/:id                     │
-│ manually   { thread, status:"review" }          │
+│ manually   { thread, images, status:"review" }  │
 │   │              ↓                              │
 │   ↓         Back to "review" ──→ (loop)         │
 │ "published"                                     │
@@ -185,63 +224,63 @@ Content-Type: application/json
 
 ---
 
-## 📏 6. Content Quality Rules
+## 📏 7. Content Quality Rules
 
 ### Character Limits
 - Each tweet: **maximum 280 characters**
 - Thread length: **3–8 tweets** (sweet spot: 5–6)
 
 ### Writing Style
-- Be engaging and professional
 - Start with a strong hook (tweet 1)
 - Build narrative across tweets
 - End with a clear CTA or takeaway
 - Use line breaks within tweets for readability
-- Avoid filler phrases — every word should earn its place
+
+### Image Best Practices
+- Include a cover image on the first tweet when possible
+- Use charts/infographics for data-heavy tweets
+- Don't attach images to every tweet — only where they add value
+- Use high-resolution images (min 800px width)
 
 ### On Rewrite
 - Address **every** comment from the admin
 - If a `selection` was highlighted → rewrite that specific part
-- Do not remove content unless explicitly asked
 - Maintain the original message intent while improving quality
-- Increment quality — each version should be noticeably better
+- You may also update images if the admin requests it
 
 ---
 
-## 🚫 7. What NOT to Do
+## 🚫 8. What NOT to Do
 
 - ❌ Do NOT auto-post to X/Twitter — publishing is manual only
 - ❌ Do NOT set status to anything other than `"review"` when creating or resubmitting
 - ❌ Do NOT exceed 280 characters per tweet
-- ❌ Do NOT ignore comments — the admin sees if feedback was addressed
-- ❌ Do NOT delete or modify comments — they are read-only for you
-
----
-
-## 📊 8. Monitoring (Optional)
-
-You can also check the status of your posts:
-
-```http
-# All your posts
-GET /posts
-
-# Filter by status
-GET /posts?status=review
-GET /posts?status=approved
-GET /posts?status=published
-
-# Search by keyword
-GET /posts?search=pharos
-```
+- ❌ Do NOT ignore comments
+- ❌ Do NOT use temporary/expiring image URLs
 
 ---
 
 ## 🔑 Quick Reference
 
-| Action | Method | Endpoint | Status After |
-|---|---|---|---|
-| Create post | `POST` | `/posts` | `review` |
-| Check for redo | `GET` | `/posts?status=redo` | — |
-| Read post details | `GET` | `/posts/:id` | — |
-| Resubmit rewrite | `PATCH` | `/posts/:id` | `review` |
+| Action | Method | Endpoint | Body | Status After |
+|---|---|---|---|---|
+| Create post | `POST` | `/posts` | `{ title, thread, images }` | `review` |
+| Check for redo | `GET` | `/posts?status=redo` | — | — |
+| Read post | `GET` | `/posts/:id` | — | — |
+| Resubmit | `PATCH` | `/posts/:id` | `{ thread, images, status:"review" }` | `review` |
+
+---
+
+## 📊 9. Dashboard View Modes (Admin Side)
+
+The admin can toggle between two views:
+
+| Mode | Behavior |
+|---|---|
+| **Split** | Each tweet displayed individually with its own image. Copy button per tweet. |
+| **Merge** | All tweets merged into one article. Only the **first image** is shown as the cover. Copy All button. |
+
+Both views support:
+- Text highlighting → inline comments
+- Copy text to clipboard (per tweet or entire article)
+- Download images
