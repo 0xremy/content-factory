@@ -68,40 +68,47 @@ Content-Type: application/json
 
 ---
 
-## 🖼️ 2. Image Guidelines
+## 🖼️ 2. Image Hosting (Free & Easy)
 
-### How Images Appear in the Dashboard:
+To provide image URLs to Content Factory, you need to host your images on the web. The recommended free and easiest service is **ImgBB**.
 
-**Split View** (default): Each tweet shows its own image below the text.
+### ImgBB API Setup:
+1. **API Key**: The admin provides the ImgBB API key.
+2. **Endpoint**: `https://api.imgbb.com/1/upload?key=YOUR_API_KEY`
 
-**Merge View**: All tweets are combined into one article. Only the **first image** from the array is displayed as the main article image.
+### How to upload an image (Logic for OpenClaw):
+- **Method**: `POST` (Multipart / Form-data)
+- **Parameter**: `image` (can be a base64 string, a binary file, or a local path if using a helper)
 
-### Image URL Requirements:
-- Must be a publicly accessible URL (no auth required)
-- Recommended formats: `.jpg`, `.png`, `.webp`
-- Recommended size: 1200×675px (16:9 ratio for Twitter)
-- URLs should be stable (not temporary/expiring links)
+**Example Request (Curl style):**
+```bash
+curl --location --request POST 'https://api.imgbb.com/1/upload?key=YOUR_API_KEY' \
+--form 'image=R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+```
 
-### Example — Thread with Mixed Images:
+**Response (Relevant field):**
+You must extract `data.url` from the response to use in the `images` array of Content Factory.
+
 ```json
 {
-  "title": "DeFi Analysis",
-  "thread": [
-    "🧵 Breaking down the latest DeFi trends...",
-    "1/ Total TVL has reached $180B across all chains",
-    "2/ Ethereum still leads with 58% market share",
-    "3/ Here's the growth chart for Q1 2026"
-  ],
-  "images": [
-    "https://example.com/defi-cover.jpg",
-    "",
-    "",
-    "https://example.com/growth-chart.png"
-  ]
+  "data": {
+    "url": "https://i.ibb.co/L5M4fHq/your-image.jpg",
+    "display_url": "...",
+    "delete_url": "..."
+  },
+  "success": true,
+  "status": 200
 }
 ```
 
+### Full Automated Workflow for Images:
+1. **Generate Image**: You create the image (using AI or local tools).
+2. **Upload to ImgBB**: Call the ImgBB API to get a permanent public URL.
+3. **Submit to Dashboard**: Include that URL in your `images` array when calling `POST /posts` or `PATCH /posts`.
+
 ---
+
+## 🖼️ 3. Image Guidelines in Dashboard
 
 ## 🔄 3. Checking for Redo Requests
 
