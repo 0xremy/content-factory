@@ -1,55 +1,73 @@
-console.log('🚀 PROFESUI SERVER IS STARTING UP...');
+console.log('🚀 Content Factory Server Starting...');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
+const cron = require('node-cron');
 require('dotenv').config();
+
+const { runAnalyticsJob } = require('./jobs/analyticsJob');
 
 const app = express();
 
-// Middleware
-app.use(helmet()); // Security headers
+// ─── Middleware ─────────────────────────────────────────────────────────────
+app.use(helmet());
 app.use(cors({
-  origin: ['https://frontend-five-phi-wdifrhj1u3.vercel.app', 'http://localhost:3000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    // Allow localhost and any Vercel deployment
+    const allowed = [
+      /^https:\/\/.*\.vercel\.app$/,
+      /^http:\/\/localhost:\d+$/,
+    ];
+    if (allowed.some(pattern => pattern.test(origin))) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
 }));
-app.use(express.json()); // Parse JSON bodies
+app.use(express.json({ limit: '5mb' }));
 
-// Prioritize Port Binding for Render Port Scan
+// ─── Port Binding (prioritize for Render) ──────────────────────────────────
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`\n🌐 Server running on http://localhost:${PORT}`);
   console.log(`🛠️  Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
-// MongoDB Connection (Now called AFTER app.listen to prevent blocking startup)
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/x-cms';
+// ─── MongoDB Connection ────────────────────────────────────────────────────
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/content-factory';
 mongoose.connect(MONGO_URI)
   .then(() => console.log('🚀 MongoDB connected successfully'))
   .catch(err => {
-    console.error('❌ MongoDB connection error: Server will start without DB connection. Some features may be unavailable.', err);
+    console.error('❌ MongoDB connection error:', err.message);
   });
 
-// Health Check Route
+// ─── Health Check ──────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Basic API Route (Placeholder for future modular routes)
 app.get('/', (req, res) => {
-  res.send('X-CMS Backend is running. Use /health for status.');
+  res.send('Content Factory API is running. Use /health for status.');
 });
 
-// API Routes
+// ─── API Routes ────────────────────────────────────────────────────────────
 app.use('/api/auth', require('./routes/authRoutes'));
-// Protected routes
-// const { authMiddleware } = require('./middleware/authMiddleware');
-// app.use('/api/posts', authMiddleware);
 app.use('/api/posts', require('./routes/postRoutes'));
 
-// Global Error Handler
+// ─── Background Jobs ──────────────────────────────────────────────────────
+// Run analytics refresh every 30 minutes
+cron.schedule('*/30 * * * *', () => {
+  console.log('[Cron] Triggering analytics job...');
+  runAnalyticsJob();
+});
+
+// ─── Global Error Handler ──────────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong on the server' });

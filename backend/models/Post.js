@@ -1,42 +1,50 @@
 const mongoose = require('mongoose');
 
+const CommentSchema = new mongoose.Schema({
+  text: { type: String, required: true },
+  selection: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now },
+});
+
 const PostSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: [true, 'Title is required for internal management'],
+    required: [true, 'Title is required'],
   },
-  content: {
+  thread: {
     type: [String],
-    required: [true, 'Post content array is required'],
-  },
-  scheduledAt: {
-    type: Date,
-    default: null,
+    required: [true, 'Thread content array is required'],
   },
   status: {
     type: String,
-    enum: ['draft', 'queued', 'publishing', 'published', 'failed'],
-    default: 'draft',
+    enum: ['draft', 'review', 'approved', 'published', 'redo', 'rejected'],
+    default: 'review',
   },
-  tweetIds: {
-    type: [String], // Array of X Tweet IDs for the thread
+  publishedUrl: {
+    type: String,
+    default: null,
+  },
+  publishedAt: {
+    type: Date,
+    default: null,
+  },
+  comments: {
+    type: [CommentSchema],
     default: [],
   },
-  errorMessage: {
-    type: String,
+  analytics: {
+    impressions: { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
+    retweets: { type: Number, default: 0 },
+    replies: { type: Number, default: 0 },
   },
-  tags: [String],
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
+  version: {
+    type: Number,
+    default: 1,
   },
 }, { timestamps: true });
 
-// Index for efficient scheduling lookups
-PostSchema.index({ scheduledAt: 1, status: 1 });
+// Indexes for efficient lookups
+PostSchema.index({ status: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Post', PostSchema);

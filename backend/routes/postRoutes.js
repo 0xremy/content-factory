@@ -1,14 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const postController = require('../controllers/postController');
+const c = require('../controllers/postController');
 
-router.get('/', postController.getPosts);
-router.post('/ingest', postController.ingestPost);
-router.post('/:postId/publish', postController.publishPost);
-router.get('/:postId/analytics', postController.getAnalytics);
-router.put('/:postId', postController.updatePost);
-router.get('/:postId/logs', postController.getEditLogs);
-router.post('/feedback', postController.addFeedback);
-router.get('/:postId/feedback', postController.getFeedback);
+// CRUD
+router.get('/', c.getPosts);
+router.get('/:id', c.getPost);
+router.post('/', c.createPost);
+router.patch('/:id', c.updatePost);
+router.delete('/:id', c.deletePost);
+
+// Workflow Actions
+router.post('/:id/approve', c.approvePost);
+router.post('/:id/reject', c.rejectPost);
+router.post('/:id/redo', c.redoPost);
+router.post('/:id/comment', c.addComment);
+
+// Manual Publish
+router.post('/:id/mark-published', c.markPublished);
+
+// Analytics
+router.get('/:id/analytics', c.getAnalytics);
 
 module.exports = router;

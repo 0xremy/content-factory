@@ -1,67 +1,138 @@
-import React, { useState, useEffect } from 'react';
-import api from '../api';
+import React, { useEffect } from 'react';
+import { Search, LayoutGrid, List } from 'lucide-react';
+import usePostStore from '../store/usePostStore';
+import StatusBadge from './StatusBadge';
 
 const ContentQueue = () => {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-
-  const fetchPosts = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      console.log('🚀 Fetching posts...');
-      const response = await api.get('/posts');
-      
-      let fetchedPosts = [];
-      if (Array.isArray(response.data)) {
-        fetchedPosts = response.data;
-      } else if (response.data && Array.isArray(response.data.data)) {
-        fetchedPosts = response.data.data;
-      } else {
-        console.error('Unexpected API response structure:', response.data);
-        throw new Error('Invalid data format received from server');
-      }
-
-      console.log('✅ Successfully fetched posts:', fetchedPosts);
-      const filteredPosts = fetchedPosts.filter(p => p.status !== 'published');
-      setPosts(filteredPosts);
-    } catch (err) {
-      console.error('❌ API Error:', err);
-      setError(err.response?.data?.error || err.message || 'Something went wrong');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { posts, loading, error, filters, statusCounts, setFilter, fetchPosts, selectPost } = usePostStore();
+  const [viewMode, setViewMode] = React.useState('grid');
+  const [searchInput, setSearchInput] = React.useState('');
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (loading) return <div className="p-4 text-center">Loading content queue...</div>;
-  if (error) return <div className="p-4 text-center text-red-500">Error: {error}</div>;
-  if (posts.length === 0) return <div className="p-4 text-center">Queue is empty. No pending posts found.</div>;
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setFilter('search', searchInput);
+  };
+
+  const statuses = ['', 'review', 'draft', 'approved', 'redo', 'published', 'rejected'];
+  const statusLabels = { '': 'All', review: 'Review', draft: 'Draft', approved: 'Approved', redo: 'Redo', published: 'Published', rejected: 'Rejected' };
+
+  const totalCount = Object.values(statusCounts).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="space-y-4 p-4">
-      <h2 className="text-xl font-bold mb-4">Content Review Queue</h2>
-      {posts.map(post => (
-        <div key={post._id} className="p-4 border rounded shadow-sm bg-white">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="font-semibold text-lg">{post.title}</h3>
-            <span className="px-2 py-1 text-xs rounded bg-gray-200">{post.status}</span>
-          </div>
-          <p className="text-gray-600 text-sm line-clamp-3">
-            {Array.isArray(post.content) ? post.content[0] : post.content || 'No content available'}
-          </p>
-          <div className="mt-3 flex justify-end">
-            <button className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
-              Review
-            </button>
-          </div>
+    <div className="space-y-6">
+      {/* Top Bar: Search + View Toggle */}
+      <div className="flex items-center gap-4">
+        <form onSubmit={handleSearch} className="flex-1 relative">
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-500" />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search posts by title or content..."
+            className="input-field pl-11 text-sm"
+          />
+        </form>
+        <div className="flex items-center gap-1 bg-dark-800 rounded-xl p-1 border border-dark-700/50">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'}`}
+          >
+            <LayoutGrid size={16} />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'}`}
+          >
+            <List size={16} />
+          </button>
         </div>
-      ))}
+      </div>
+
+      {/* Status Filter Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        {statuses.map((s) => {
+          const count = s === '' ? totalCount : (statusCounts[s] || 0);
+          const isActive = filters.status === s;
+          return (
+            <button
+              key={s}
+              onClick={() => setFilter('status', s)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+                isActive
+                  ? 'bg-dark-700 text-white border border-dark-600'
+                  : 'text-dark-400 hover:text-dark-200 hover:bg-dark-800/50 border border-transparent'
+              }`}
+            >
+              {statusLabels[s]}
+              <span className={`text-xs px-1.5 py-0.5 rounded-md ${isActive ? 'bg-dark-600 text-dark-200' : 'bg-dark-800 text-dark-500'}`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Loading / Error / Empty */}
+      {loading && (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 border-2 border-dark-600 border-t-blue-500 rounded-full animate-spin" />
+        </div>
+      )}
+
+      {error && (
+        <div className="text-center py-12 text-red-400">
+          <p className="text-sm">Error: {error}</p>
+          <button onClick={fetchPosts} className="btn-primary text-sm mt-4">Retry</button>
+        </div>
+      )}
+
+      {!loading && !error && posts.length === 0 && (
+        <div className="text-center py-20 text-dark-500">
+          <p className="text-lg font-medium mb-1">No posts found</p>
+          <p className="text-sm">Try changing the filter or search terms.</p>
+        </div>
+      )}
+
+      {/* Post Grid/List */}
+      {!loading && !error && posts.length > 0 && (
+        <div className={viewMode === 'grid'
+          ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'
+          : 'space-y-3'
+        }>
+          {posts.map((post) => (
+            <div
+              key={post._id}
+              onClick={() => selectPost(post._id)}
+              className="glass-card-hover p-5 cursor-pointer group"
+            >
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <h3 className="font-semibold text-dark-100 text-sm leading-snug line-clamp-2 group-hover:text-white transition-colors">
+                  {post.title}
+                </h3>
+                <StatusBadge status={post.status} />
+              </div>
+
+              <p className="text-dark-400 text-xs leading-relaxed line-clamp-2 mb-4">
+                {(post.thread || post.content || [])[0] || 'No content'}
+              </p>
+
+              <div className="flex items-center justify-between text-xs text-dark-500">
+                <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                <div className="flex items-center gap-3">
+                  {post.comments?.length > 0 && (
+                    <span className="text-amber-400/70">💬 {post.comments.length}</span>
+                  )}
+                  <span className="font-mono text-dark-600">v{post.version || 1}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

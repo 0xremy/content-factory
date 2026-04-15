@@ -1,19 +1,15 @@
 import React from 'react';
 import Sidebar from './Sidebar';
-import Header from './Header';
 
-const Layout = ({ children, title, onLogout }) => {
+const Layout = ({ children, onLogout }) => {
   return (
-    <div className="flex h-screen bg-slate-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title={title} onLogout={onLogout} />
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
-        </main>
-      </div>
+    <div className="flex h-screen overflow-hidden bg-dark-950">
+      <Sidebar onLogout={onLogout} />
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto p-6 lg:p-8">
+          {children}
+        </div>
+      </main>
     </div>
   );
 };

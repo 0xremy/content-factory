@@ -43,19 +43,28 @@ function generateOAuthHeader(method, url, params = {}) {
   return `OAuth ${headerParams}`;
 }
 
+/**
+ * Extract tweet ID from a Twitter/X URL
+ * Supports: https://x.com/user/status/123, https://twitter.com/user/status/123
+ */
+function extractTweetId(url) {
+  const match = url.match(/(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Fetch public metrics for a tweet by ID
+ */
 async function getTweetMetrics(tweetId) {
   const url = `https://api.twitter.com/2/tweets/${tweetId}?tweet.fields=public_metrics`;
   const method = 'GET';
-
   const authHeader = generateOAuthHeader(method, url);
 
   const options = {
     hostname: 'api.twitter.com',
     path: `/2/tweets/${tweetId}?tweet.fields=public_metrics`,
     method: method,
-    headers: {
-      'Authorization': authHeader,
-    },
+    headers: { 'Authorization': authHeader },
   };
 
   return new Promise((resolve, reject) => {
@@ -68,26 +77,16 @@ async function getTweetMetrics(tweetId) {
           if (res.statusCode >= 200 && res.statusCode < 300) {
             resolve(response.data);
           } else {
-            reject({
-              status: res.statusCode,
-              data: response,
-            });
+            reject({ status: res.statusCode, data: response });
           }
         } catch (e) {
           reject(e);
         }
       });
     });
-
     req.on('error', (err) => reject(err));
     req.end();
   });
 }
 
-function postTweet(status) {
-  // Placeholder implementation – you can replace this with the actual Twitter POST endpoint.
-  // For now we simply reject to indicate it is not implemented.
-  return Promise.reject(new Error('postTweet function is not implemented yet.'));
-}
-
-module.exports = { postTweet, getTweetMetrics };
+module.exports = { getTweetMetrics, extractTweetId };
