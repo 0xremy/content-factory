@@ -259,6 +259,7 @@ Content-Type: application/json
 
 ## 🚫 8. What NOT to Do
 
+- ❌ Do NOT seek for a "push-to-frontend" or `/api/push_to_fe` endpoint. It does not exist.
 - ❌ Do NOT auto-post to X/Twitter — publishing is manual only
 - ❌ Do NOT set status to anything other than `"review"` when creating or resubmitting
 - ❌ Do NOT exceed 280 characters per tweet
