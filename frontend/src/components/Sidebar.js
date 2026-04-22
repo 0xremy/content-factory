@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap } from 'lucide-react';
+import { Zap, X } from 'lucide-react';
 
 const Sidebar = ({ onLogout, onClose }) => {
   return (
