@@ -111,13 +111,25 @@ const PostModal = () => {
             </button>
           </div>
 
-          {/* Bottom Row: Title + Status (Align Left) */}
-          <div className="flex items-center gap-3 min-w-0">
-            <h2 className="text-lg lg:text-xl font-extrabold text-white break-words line-clamp-2">{post.title}</h2>
-            <div className="shrink-0">
-              <StatusBadge status={post.status} size="sm" />
+          {/* Bottom Row: Title + Status */}
+          <div className="space-y-2 min-w-0">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl lg:text-2xl font-extrabold text-white break-words line-clamp-2">{post.title}</h2>
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(post.title);
+                  alert('Title copied!');
+                }}
+                className="p-1.5 text-dark-500 hover:text-white hover:bg-dark-800 rounded-lg transition-all shrink-0"
+                title="Copy Title"
+              >
+                <Copy size={16} />
+              </button>
             </div>
-            <span className="hidden md:inline text-[10px] text-dark-600 font-mono">v{post.version}</span>
+            <div className="flex items-center gap-3">
+              <StatusBadge status={post.status} size="sm" />
+              <span className="text-[10px] text-dark-600 font-mono">v{post.version}</span>
+            </div>
           </div>
         </div>
 
