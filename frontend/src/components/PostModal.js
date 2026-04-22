@@ -76,50 +76,37 @@ const PostModal = () => {
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={clearSelection} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-5xl max-h-[92vh] mt-[4vh] mx-4 bg-dark-900 border border-dark-700/50 rounded-2xl shadow-2xl flex flex-col animate-slide-up overflow-hidden">
+      <div className="relative w-full lg:max-w-5xl h-full lg:h-auto lg:max-h-[92vh] lg:mt-[4vh] lg:mx-4 bg-dark-900 border-x lg:border border-dark-700/50 lg:rounded-2xl shadow-2xl flex flex-col animate-slide-up overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-dark-700/50 shrink-0">
-          <div className="flex items-center gap-4 min-w-0">
-            <h2 className="text-lg font-bold text-dark-100 truncate">{post.title}</h2>
-            <StatusBadge status={post.status} size="lg" />
-            <span className="text-xs text-dark-500 font-mono shrink-0">v{post.version}</span>
+        <div className="flex items-center justify-between p-4 lg:p-5 border-b border-dark-700/50 shrink-0">
+          <div className="flex items-center gap-3 lg:gap-4 min-w-0">
+            <h2 className="text-base lg:text-lg font-bold text-dark-100 truncate">{post.title}</h2>
+            <StatusBadge status={post.status} size="sm" />
+            <span className="hidden sm:inline text-xs text-dark-500 font-mono shrink-0">v{post.version}</span>
           </div>
           <div className="flex items-center gap-2">
-            {/* Merge / Split Toggle */}
+            {/* Merge / Split Toggle - Simplified for mobile */}
             <div className="flex items-center bg-dark-800 rounded-xl p-1 border border-dark-700/50">
               <button
                 onClick={() => setViewMode('split')}
-                title="Split View — Individual tweets with images"
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                title="Split View"
+                className={`p-1.5 rounded-lg transition-all ${
                   viewMode === 'split' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'
                 }`}
               >
-                <Split size={14} /> Split
+                <Split size={14} />
               </button>
               <button
                 onClick={() => setViewMode('merge')}
-                title="Merge View — Single article with first image"
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                title="Merge View"
+                className={`p-1.5 rounded-lg transition-all ${
                   viewMode === 'merge' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'
                 }`}
               >
-                <Merge size={14} /> Merge
+                <Merge size={14} />
               </button>
             </div>
-
-            {/* Copy All */}
-            <button
-              onClick={handleCopyAll}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all border ${
-                allCopied
-                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                  : 'bg-dark-800 text-dark-400 hover:text-white border-dark-700/50 hover:bg-dark-700'
-              }`}
-            >
-              {allCopied ? <Check size={14} /> : <Copy size={14} />}
-              {allCopied ? 'Copied!' : 'Copy All'}
-            </button>
 
             <button onClick={clearSelection} className="p-2 text-dark-400 hover:text-white hover:bg-dark-800 rounded-xl transition-all">
               <X size={20} />
@@ -128,9 +115,9 @@ const PostModal = () => {
         </div>
 
         {/* Body */}
-        <div className="flex flex-1 min-h-0 overflow-hidden">
+        <div className="flex flex-1 flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden">
           {/* Left: Thread */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 lg:overflow-y-auto p-4 lg:p-6 border-b lg:border-b-0 lg:border-r border-dark-700/50">
             <ThreadDisplay
               thread={thread}
               images={images}
@@ -140,9 +127,9 @@ const PostModal = () => {
           </div>
 
           {/* Right: Sidebar */}
-          <div className="w-80 border-l border-dark-700/50 flex flex-col overflow-hidden shrink-0">
+          <div className="w-full lg:w-80 flex flex-col shrink-0">
             {/* Comments */}
-            <div className="flex-1 overflow-y-auto p-4 min-h-0">
+            <div className="lg:flex-1 lg:overflow-y-auto p-4 min-h-[300px] lg:min-h-0">
               <CommentPanel
                 comments={post.comments || []}
                 onAddComment={(text, sel) => addComment(post._id, text, sel)}

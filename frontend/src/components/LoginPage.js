@@ -22,9 +22,9 @@ const LoginPage = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-dark-950 px-4 py-12">
       {/* Subtle background glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative w-full max-w-sm animate-slide-up">
         {/* Brand */}

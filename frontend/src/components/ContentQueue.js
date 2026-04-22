@@ -25,30 +25,32 @@ const ContentQueue = () => {
   return (
     <div className="space-y-6">
       {/* Top Bar: Search + View Toggle */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center gap-4">
         <form onSubmit={handleSearch} className="flex-1 relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-500" />
           <input
             type="text"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search posts by title or content..."
-            className="input-field pl-11 text-sm"
+            placeholder="Search posts..."
+            className="input-field pl-11 text-sm py-2.5"
           />
         </form>
-        <div className="flex items-center gap-1 bg-dark-800 rounded-xl p-1 border border-dark-700/50">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'}`}
-          >
-            <LayoutGrid size={16} />
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'}`}
-          >
-            <List size={16} />
-          </button>
+        <div className="flex items-center justify-between lg:justify-start gap-3">
+          <div className="flex items-center gap-1 bg-dark-800 rounded-xl p-1 border border-dark-700/50">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'}`}
+            >
+              <LayoutGrid size={16} />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'}`}
+            >
+              <List size={16} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -100,7 +102,7 @@ const ContentQueue = () => {
       {/* Post Grid/List */}
       {!loading && !error && posts.length > 0 && (
         <div className={viewMode === 'grid'
-          ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'
+          ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'
           : 'space-y-3'
         }>
           {posts.map((post) => (

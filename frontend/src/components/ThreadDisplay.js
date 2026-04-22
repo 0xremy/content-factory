@@ -161,7 +161,7 @@ const ThreadDisplay = ({ thread = [], images = [], viewMode = 'split', onHighlig
   // ─── SPLIT VIEW: Individual tweets ────────────────────────────────────
   return (
     <div className="relative" onMouseUp={handleMouseUp}>
-      <div className="space-y-0 border-l-2 border-dark-700/50 ml-5 pl-8">
+      <div className="space-y-0 border-l-2 border-dark-700/50 ml-2 sm:ml-5 pl-5 sm:pl-8">
         {thread.map((text, index) => {
           const image = images[index];
           const hasImage = image && image.trim() !== '';
@@ -169,35 +169,35 @@ const ThreadDisplay = ({ thread = [], images = [], viewMode = 'split', onHighlig
           return (
             <div key={index} className="relative mb-6 last:mb-0">
               {/* Timeline dot */}
-              <div className="absolute -left-[2.35rem] top-4 w-3 h-3 bg-dark-700 rounded-full border-2 border-dark-900 z-10" />
+              <div className="absolute -left-[1.65rem] sm:-left-[2.35rem] top-4 w-3 h-3 bg-dark-700 rounded-full border-2 border-dark-900 z-10" />
 
-              <div className="bg-dark-800/40 border border-dark-700/30 rounded-2xl p-5 hover:border-dark-600/50 transition-all duration-200">
+              <div className="bg-dark-800/40 border border-dark-700/30 rounded-2xl p-4 sm:p-5 hover:border-dark-600/50 transition-all duration-200">
                 {/* Tweet Header */}
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-sm font-bold shrink-0">
-                      <User size={16} />
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-xs sm:text-sm font-bold shrink-0">
+                      <User size={14} />
                     </div>
-                    <div>
-                      <div className="font-bold text-dark-100 text-sm leading-tight">Content Factory</div>
-                      <div className="text-dark-500 text-xs">Tweet {index + 1} of {thread.length}</div>
+                    <div className="min-w-0">
+                      <div className="font-bold text-dark-100 text-xs sm:text-sm leading-tight truncate">Content Factory</div>
+                      <div className="text-dark-500 text-[10px] sm:text-xs truncate">Tweet {index + 1} of {thread.length}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1">
                     {hasImage && <ImageDownloadButton url={image} filename={`tweet-${index + 1}-image.jpg`} />}
                     <CopyButton text={text} />
                   </div>
                 </div>
 
                 {/* Tweet Body */}
-                <div className="text-dark-200 whitespace-pre-wrap leading-relaxed text-[15px] select-text cursor-text mb-3">
+                <div className="text-dark-200 whitespace-pre-wrap leading-relaxed text-sm sm:text-[15px] select-text cursor-text mb-3">
                   {text}
                 </div>
 
                 {/* Tweet Image */}
                 {hasImage && (
                   <div className="mb-3 rounded-xl overflow-hidden border border-dark-700/30 relative group">
-                    <img src={image} alt={`Tweet ${index + 1}`} className="w-full max-h-72 object-cover" />
+                    <img src={image} alt={`Tweet ${index + 1}`} className="w-full max-h-60 sm:max-h-72 object-cover" />
                     <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5">
                       <CopyButton text={image} label="Copy URL" />
                     </div>
