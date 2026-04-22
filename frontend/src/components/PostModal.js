@@ -79,48 +79,47 @@ const PostModal = () => {
       <div className="relative w-full lg:max-w-5xl h-full lg:h-auto lg:max-h-[92vh] lg:mt-[4vh] lg:mx-4 bg-dark-900 border-x lg:border border-dark-700/50 lg:rounded-2xl shadow-2xl flex flex-col animate-slide-up overflow-hidden">
 
         {/* Header */}
-        <div className="flex flex-col sm:grid sm:grid-cols-3 sm:items-center p-4 lg:p-5 border-b border-dark-700/50 shrink-0 gap-4">
-          {/* Left: Title */}
-          <div className="flex items-center gap-3 min-w-0">
-            <h2 className="text-base lg:text-lg font-bold text-dark-100 break-words line-clamp-2 sm:line-clamp-1">{post.title}</h2>
-            <div className="shrink-0">
-              <StatusBadge status={post.status} size="sm" />
+        <div className="flex flex-col p-4 lg:p-5 border-b border-dark-700/50 shrink-0 gap-4">
+          {/* Top Row: Title + Status + Close Button */}
+          <div className="flex items-center justify-between gap-3 min-w-0">
+            <div className="flex items-center gap-3 min-w-0">
+              <h2 className="text-base lg:text-lg font-bold text-dark-100 break-words line-clamp-2 sm:line-clamp-1">{post.title}</h2>
+              <div className="shrink-0">
+                <StatusBadge status={post.status} size="sm" />
+              </div>
+              <span className="hidden md:inline text-[10px] text-dark-600 font-mono">v{post.version}</span>
             </div>
+            
+            <button 
+              onClick={clearSelection} 
+              className="p-2 text-dark-400 hover:text-white hover:bg-dark-800 rounded-xl transition-all border border-transparent hover:border-dark-700 shrink-0"
+            >
+              <X size={24} />
+            </button>
           </div>
 
-          {/* Center: Merge / Split Toggle */}
+          {/* Bottom Row (Centered on all screens): Merge / Split Toggle */}
           <div className="flex justify-center items-center">
-            <div className="flex items-center bg-dark-800 rounded-xl p-1.5 border border-dark-700/50 shadow-inner">
+            <div className="flex items-center bg-dark-800 rounded-xl p-1.5 border border-dark-700/50 shadow-inner w-full sm:w-auto max-w-xs sm:max-w-none">
               <button
                 onClick={() => setViewMode('split')}
                 title="Split View"
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
                   viewMode === 'split' ? 'bg-dark-700 text-white shadow-lg' : 'text-dark-500 hover:text-dark-300'
                 }`}
               >
-                <Split size={16} /> <span className="hidden md:inline">Split</span>
+                <Split size={16} /> <span>Split</span>
               </button>
               <button
                 onClick={() => setViewMode('merge')}
                 title="Merge View"
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
                   viewMode === 'merge' ? 'bg-dark-700 text-white shadow-lg' : 'text-dark-500 hover:text-dark-300'
                 }`}
               >
-                <Merge size={16} /> <span className="hidden md:inline">Merge</span>
+                <Merge size={16} /> <span>Merge</span>
               </button>
             </div>
-          </div>
-
-          {/* Right: Close Button */}
-          <div className="flex items-center justify-end gap-2">
-            <span className="hidden md:inline text-[10px] text-dark-600 font-mono">v{post.version}</span>
-            <button 
-              onClick={clearSelection} 
-              className="p-2.5 text-dark-400 hover:text-white hover:bg-dark-800 rounded-xl transition-all border border-transparent hover:border-dark-700"
-            >
-              <X size={24} />
-            </button>
           </div>
         </div>
 
