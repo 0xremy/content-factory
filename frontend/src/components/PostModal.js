@@ -91,29 +91,30 @@ const PostModal = () => {
             <div className="flex items-center gap-2">
               {/* Merge / Split Toggle - Simplified for mobile */}
               <div className="flex items-center bg-dark-800 rounded-xl p-1 border border-dark-700/50">
-              <button
-                onClick={() => setViewMode('split')}
-                title="Split View"
-                className={`p-1.5 rounded-lg transition-all ${
-                  viewMode === 'split' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'
-                }`}
-              >
-                <Split size={14} />
-              </button>
-              <button
-                onClick={() => setViewMode('merge')}
-                title="Merge View"
-                className={`p-1.5 rounded-lg transition-all ${
-                  viewMode === 'merge' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'
-                }`}
-              >
-                <Merge size={14} />
+                <button
+                  onClick={() => setViewMode('split')}
+                  title="Split View"
+                  className={`p-1.5 rounded-lg transition-all ${
+                    viewMode === 'split' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'
+                  }`}
+                >
+                  <Split size={14} />
+                </button>
+                <button
+                  onClick={() => setViewMode('merge')}
+                  title="Merge View"
+                  className={`p-1.5 rounded-lg transition-all ${
+                    viewMode === 'merge' ? 'bg-dark-700 text-white' : 'text-dark-500 hover:text-dark-300'
+                  }`}
+                >
+                  <Merge size={14} />
+                </button>
+              </div>
+
+              <button onClick={clearSelection} className="p-2 text-dark-400 hover:text-white hover:bg-dark-800 rounded-xl transition-all">
+                <X size={20} />
               </button>
             </div>
-
-            <button onClick={clearSelection} className="p-2 text-dark-400 hover:text-white hover:bg-dark-800 rounded-xl transition-all">
-              <X size={20} />
-            </button>
           </div>
         </div>
 
