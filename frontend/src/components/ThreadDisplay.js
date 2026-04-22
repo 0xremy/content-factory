@@ -38,31 +38,18 @@ const CopyButton = ({ text, label = 'Copy' }) => {
   );
 };
 
-const ImageDownloadButton = ({ url, filename }) => {
-  const handleDownload = async (e) => {
+const ImageDownloadButton = ({ url }) => {
+  const handleOpen = (e) => {
     e.stopPropagation();
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename || 'image.jpg';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
-    } catch {
-      // Fallback: open in new tab
-      window.open(url, '_blank');
-    }
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
     <button
-      onClick={handleDownload}
+      onClick={handleOpen}
       className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-dark-700/50 text-dark-400 hover:text-white hover:bg-dark-700 border border-dark-600/30 transition-all duration-200"
     >
-      <Download size={12} /> Save
+      <Download size={12} /> <span className="hidden sm:inline">Save</span><span className="sm:hidden">Open</span>
     </button>
   );
 };
@@ -132,7 +119,7 @@ const ThreadDisplay = ({ thread = [], images = [], viewMode = 'split', onHighlig
             <div className="mb-4 rounded-xl overflow-hidden border border-dark-700/30 relative group">
               <img src={firstImage} alt="Post" className="w-full max-h-80 object-cover" />
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <ImageDownloadButton url={firstImage} filename="article-image.jpg" />
+                <ImageDownloadButton url={firstImage} />
               </div>
             </div>
           )}
@@ -184,7 +171,7 @@ const ThreadDisplay = ({ thread = [], images = [], viewMode = 'split', onHighlig
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    {hasImage && <ImageDownloadButton url={image} filename={`tweet-${index + 1}-image.jpg`} />}
+                    {hasImage && <ImageDownloadButton url={image} />}
                     <CopyButton text={text} />
                   </div>
                 </div>
