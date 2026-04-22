@@ -79,15 +79,18 @@ const PostModal = () => {
       <div className="relative w-full lg:max-w-5xl h-full lg:h-auto lg:max-h-[92vh] lg:mt-[4vh] lg:mx-4 bg-dark-900 border-x lg:border border-dark-700/50 lg:rounded-2xl shadow-2xl flex flex-col animate-slide-up overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between p-4 lg:p-5 border-b border-dark-700/50 shrink-0">
-          <div className="flex items-center gap-3 lg:gap-4 min-w-0">
-            <h2 className="text-base lg:text-lg font-bold text-dark-100 truncate">{post.title}</h2>
-            <StatusBadge status={post.status} size="sm" />
-            <span className="hidden sm:inline text-xs text-dark-500 font-mono shrink-0">v{post.version}</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 lg:p-5 border-b border-dark-700/50 shrink-0 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <h2 className="text-base lg:text-lg font-bold text-dark-100 break-words line-clamp-2 sm:line-clamp-1">{post.title}</h2>
+            <div className="shrink-0">
+              <StatusBadge status={post.status} size="sm" />
+            </div>
+            <span className="hidden md:inline text-xs text-dark-500 font-mono shrink-0">v{post.version}</span>
           </div>
-          <div className="flex items-center gap-2">
-            {/* Merge / Split Toggle - Simplified for mobile */}
-            <div className="flex items-center bg-dark-800 rounded-xl p-1 border border-dark-700/50">
+          <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+            <div className="flex items-center gap-2">
+              {/* Merge / Split Toggle - Simplified for mobile */}
+              <div className="flex items-center bg-dark-800 rounded-xl p-1 border border-dark-700/50">
               <button
                 onClick={() => setViewMode('split')}
                 title="Split View"
@@ -128,13 +131,15 @@ const PostModal = () => {
 
           {/* Right: Sidebar */}
           <div className="w-full lg:w-80 flex flex-col shrink-0">
-            {/* Comments */}
-            <div className="lg:flex-1 lg:overflow-y-auto p-4 min-h-[300px] lg:min-h-0">
-              <CommentPanel
-                comments={post.comments || []}
-                onAddComment={(text, sel) => addComment(post._id, text, sel)}
-              />
-            </div>
+            {/* Comments - Only show if not approved/published/rejected */}
+            {!['approved', 'published', 'rejected'].includes(post.status) && (
+              <div className="lg:flex-1 lg:overflow-y-auto p-4 min-h-[300px] lg:min-h-0">
+                <CommentPanel
+                  comments={post.comments || []}
+                  onAddComment={(text, sel) => addComment(post._id, text, sel)}
+                />
+              </div>
+            )}
 
             {/* Analytics (published only) */}
             {post.status === 'published' && (
