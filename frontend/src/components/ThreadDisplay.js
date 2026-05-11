@@ -148,7 +148,7 @@ const ThreadDisplay = ({ thread = [], images = [], viewMode = 'split', onHighlig
   // ─── SPLIT VIEW: Individual tweets ────────────────────────────────────
   return (
     <div className="relative" onMouseUp={handleMouseUp}>
-      <div className="space-y-0 border-l-2 border-dark-700/50 ml-2 sm:ml-5 pl-5 sm:pl-8">
+      <div className="space-y-6 border-l-2 border-dark-700/50 ml-2 sm:ml-5 pl-5 sm:pl-8">
         {thread.map((text, index) => {
           const image = images[index];
           const hasImage = image && image.trim() !== '';
