@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Search, LayoutGrid, List, Check, RotateCcw, Ban, Trash2, CheckSquare, Square, X } from 'lucide-react';
+import { Search, LayoutGrid, List, Check, RotateCcw, Ban, Trash2, CheckSquare, Square, X, RefreshCcw } from 'lucide-react';
 import usePostStore from '../store/usePostStore';
 import StatusBadge from './StatusBadge';
 import ConfirmModal from './ConfirmModal';
 
 const ContentQueue = () => {
-  const { posts, loading, error, filters, statusCounts, setFilter, fetchPosts, selectPost, approvePost, rejectPost, redoPost, deletePost } = usePostStore();
+  const { posts, loading, error, filters, statusCounts, setFilter, fetchPosts, selectPost, approvePost, rejectPost, redoPost, deletePost, moveToReview } = usePostStore();
   const [viewMode, setViewMode] = React.useState('grid');
   const [searchInput, setSearchInput] = React.useState('');
 
@@ -73,6 +73,7 @@ const ContentQueue = () => {
           if (action === 'redo') return redoPost(id);
           if (action === 'reject') return rejectPost(id);
           if (action === 'delete') return deletePost(id);
+          if (action === 'moveToReview') return moveToReview(id);
           return Promise.resolve();
         })
       );
@@ -92,6 +93,12 @@ const ContentQueue = () => {
 
   const allSelected = posts.length > 0 && selectedIds.length === posts.length;
   const someSelected = selectedIds.length > 0;
+
+  // Show "Move to Review" only when at least one selected post is approved/published/rejected
+  const selectedPosts = posts.filter((p) => selectedIds.includes(p._id));
+  const canMoveToReview = selectedPosts.some((p) =>
+    ['approved', 'published', 'rejected'].includes(p.status)
+  );
 
   return (
     <div className="space-y-6">
@@ -199,6 +206,21 @@ const ContentQueue = () => {
             <Trash2 size={13} />
             {bulkActionLoading === 'delete' ? 'Deleting…' : 'Delete'}
           </button>
+
+          {/* Move to Review (only when applicable statuses are selected) */}
+          {canMoveToReview && (
+            <>
+              <div className="w-px h-5 bg-dark-600" />
+              <button
+                onClick={() => handleBulkActionClick('moveToReview')}
+                disabled={!!bulkActionLoading}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-amber-600/20 text-amber-400 hover:bg-amber-600 hover:text-white rounded-xl transition-all disabled:opacity-40"
+              >
+                <RefreshCcw size={13} />
+                {bulkActionLoading === 'moveToReview' ? 'Moving…' : 'Move to Review'}
+              </button>
+            </>
+          )}
 
           {/* Spacer + Clear */}
           <button

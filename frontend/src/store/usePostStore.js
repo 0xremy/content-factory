@@ -116,6 +116,17 @@ const usePostStore = create((set, get) => ({
       throw err;
     }
   },
+
+  moveToReview: async (postId) => {
+    try {
+      const res = await api.post(`/posts/${postId}/move-to-review`);
+      set({ selectedPost: res.data.data });
+      get().fetchPosts();
+    } catch (err) {
+      console.error('MoveToReview error:', err);
+      throw err;
+    }
+  },
 }));
 
 export default usePostStore;

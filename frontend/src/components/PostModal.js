@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, RotateCcw, Ban, Link2, Trash2, Merge, Split, Copy } from 'lucide-react';
+import { X, Check, RotateCcw, Ban, Link2, Trash2, Merge, Split, Copy, RefreshCcw } from 'lucide-react';
 import usePostStore from '../store/usePostStore';
 import StatusBadge from './StatusBadge';
 import ThreadDisplay from './ThreadDisplay';
@@ -8,7 +8,7 @@ import AnalyticsSummary from './AnalyticsSummary';
 import ConfirmModal from './ConfirmModal';
 
 const PostModal = () => {
-  const { selectedPost, clearSelection, approvePost, rejectPost, redoPost, addComment, markPublished, deletePost } = usePostStore();
+  const { selectedPost, clearSelection, approvePost, rejectPost, redoPost, addComment, markPublished, deletePost, moveToReview } = usePostStore();
   const [publishUrl, setPublishUrl] = useState('');
   const [actionLoading, setActionLoading] = useState('');
   const [viewMode, setViewMode] = useState('split'); // 'split' or 'merge'
@@ -43,6 +43,7 @@ const PostModal = () => {
         case 'reject': await rejectPost(post._id); break;
         case 'redo': await redoPost(post._id); break;
         case 'delete': await deletePost(post._id); break;
+        case 'moveToReview': await moveToReview(post._id); break;
         case 'publish':
           await markPublished(post._id, publishUrl);
           setPublishUrl('');
@@ -214,7 +215,7 @@ const PostModal = () => {
                   </div>
                 )}
 
-                {/* Approved — Mark Published */}
+                {/* Approved — Mark Published + Move to Review */}
                 {post.status === 'approved' && (
                   <div className="space-y-2">
                     <p className="text-xs text-dark-400">Post to X, then paste the URL here:</p>
@@ -234,7 +235,25 @@ const PostModal = () => {
                         <Link2 size={14} /> Publish
                       </button>
                     </div>
+                    <button
+                      onClick={() => handleAction('moveToReview')}
+                      disabled={actionLoading === 'moveToReview'}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-amber-600/20 text-amber-400 hover:bg-amber-600 hover:text-white font-semibold rounded-xl transition-all text-sm"
+                    >
+                      <RefreshCcw size={15} /> Move back to Review
+                    </button>
                   </div>
+                )}
+
+                {/* Published — Move to Review */}
+                {post.status === 'published' && (
+                  <button
+                    onClick={() => handleAction('moveToReview')}
+                    disabled={actionLoading === 'moveToReview'}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-amber-600/20 text-amber-400 hover:bg-amber-600 hover:text-white font-semibold rounded-xl transition-all text-sm"
+                  >
+                    <RefreshCcw size={15} /> Move back to Review
+                  </button>
                 )}
 
                 {/* Delete (always available) */}

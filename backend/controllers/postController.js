@@ -211,6 +211,29 @@ exports.markPublished = async (req, res) => {
   }
 };
 
+// ─── Move to Review (from approved / published) ────────────────────────────
+exports.moveToReview = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ success: false, message: 'Post not found.' });
+
+    const allowed = ['approved', 'published', 'rejected'];
+    if (!allowed.includes(post.status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot move post with status "${post.status}" back to review. Allowed: ${allowed.join(', ')}.`,
+      });
+    }
+
+    post.status = 'review';
+    await post.save();
+    res.json({ success: true, data: post });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error moving post to review.', error: error.message });
+  }
+};
+
+
 // ─── Get Analytics ─────────────────────────────────────────────────────────
 exports.getAnalytics = async (req, res) => {
   try {

@@ -18,6 +18,9 @@ router.post('/:id/comment', c.addComment);
 // Manual Publish
 router.post('/:id/mark-published', c.markPublished);
 
+// Move back to Review
+router.post('/:id/move-to-review', c.moveToReview);
+
 // Analytics
 router.get('/:id/analytics', c.getAnalytics);
 
