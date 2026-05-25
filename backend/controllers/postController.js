@@ -1,16 +1,18 @@
 const Post = require('../models/Post');
 
-// ─── List Posts (with filters, search, pagination) ─────────────────────────
+// --- List Posts (with filters, search, pagination) ---
 exports.getPosts = async (req, res) => {
   try {
-    const { status, search, page = 1, limit = 50 } = req.query;
+    const { status, search, tag, page = 1, limit = 50 } = req.query;
     const filter = {};
 
     if (status) filter.status = status;
+    if (tag) filter.tags = tag;
     if (search) {
       filter.$or = [
         { title: { $regex: search, $options: 'i' } },
         { thread: { $elemMatch: { $regex: search, $options: 'i' } } },
+        { tags: { $regex: search, $options: 'i' } },
       ];
     }
 
@@ -20,7 +22,6 @@ exports.getPosts = async (req, res) => {
       Post.countDocuments(filter),
     ]);
 
-    // Also fetch status counts for the sidebar
     const counts = await Post.aggregate([
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]);
@@ -39,7 +40,7 @@ exports.getPosts = async (req, res) => {
   }
 };
 
-// ─── Get Single Post ───────────────────────────────────────────────────────
+// --- Get Single Post ---
 exports.getPost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -50,10 +51,10 @@ exports.getPost = async (req, res) => {
   }
 };
 
-// ─── Create Post (used by OpenClaw) ────────────────────────────────────────
+// --- Create Post ---
 exports.createPost = async (req, res) => {
   try {
-    const { title, thread, images, status } = req.body;
+    const { title, thread, images, tags, status } = req.body;
 
     if (!title || !thread || !Array.isArray(thread) || thread.length === 0) {
       return res.status(400).json({
@@ -66,6 +67,7 @@ exports.createPost = async (req, res) => {
       title,
       thread,
       images: Array.isArray(images) ? images : [],
+      tags: Array.isArray(tags) ? tags : [],
       status: status || 'review',
       version: 1,
     });
@@ -77,13 +79,13 @@ exports.createPost = async (req, res) => {
   }
 };
 
-// ─── Update Post (used by OpenClaw for redo, or admin edits) ───────────────
+// --- Update Post ---
 exports.updatePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ success: false, message: 'Post not found.' });
 
-    const { title, thread, images, status } = req.body;
+    const { title, thread, images, tags, status } = req.body;
 
     if (title !== undefined) post.title = title;
     if (thread !== undefined) {
@@ -91,6 +93,7 @@ exports.updatePost = async (req, res) => {
       post.version += 1;
     }
     if (images !== undefined) post.images = images;
+    if (tags !== undefined) post.tags = tags;
     if (status !== undefined) post.status = status;
 
     await post.save();
@@ -101,7 +104,7 @@ exports.updatePost = async (req, res) => {
   }
 };
 
-// ─── Delete Post ───────────────────────────────────────────────────────────
+// --- Delete Post ---
 exports.deletePost = async (req, res) => {
   try {
     const post = await Post.findByIdAndDelete(req.params.id);
@@ -112,16 +115,14 @@ exports.deletePost = async (req, res) => {
   }
 };
 
-// ─── Approve Post ──────────────────────────────────────────────────────────
+// --- Approve Post ---
 exports.approvePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ success: false, message: 'Post not found.' });
-
     if (post.status !== 'review') {
       return res.status(400).json({ success: false, message: `Cannot approve post with status "${post.status}". Must be "review".` });
     }
-
     post.status = 'approved';
     await post.save();
     res.json({ success: true, data: post });
@@ -130,12 +131,11 @@ exports.approvePost = async (req, res) => {
   }
 };
 
-// ─── Reject Post ───────────────────────────────────────────────────────────
+// --- Reject Post ---
 exports.rejectPost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ success: false, message: 'Post not found.' });
-
     post.status = 'rejected';
     await post.save();
     res.json({ success: true, data: post });
@@ -144,18 +144,15 @@ exports.rejectPost = async (req, res) => {
   }
 };
 
-// ─── Redo Post (send back to OpenClaw) ─────────────────────────────────────
+// --- Redo Post ---
 exports.redoPost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ success: false, message: 'Post not found.' });
-
     if (post.status !== 'review') {
       return res.status(400).json({ success: false, message: `Cannot redo post with status "${post.status}". Must be "review".` });
     }
-
     post.status = 'redo';
-    // Comments are preserved for OpenClaw to read
     await post.save();
     res.json({ success: true, data: post });
   } catch (error) {
@@ -163,60 +160,50 @@ exports.redoPost = async (req, res) => {
   }
 };
 
-// ─── Add Comment (with text highlight selection) ───────────────────────────
+// --- Add Comment ---
 exports.addComment = async (req, res) => {
   try {
     const { text, selection } = req.body;
-
     if (!text) {
       return res.status(400).json({ success: false, message: 'Comment text is required.' });
     }
-
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ success: false, message: 'Post not found.' });
-
     post.comments.push({ text, selection: selection || '', createdAt: new Date() });
     await post.save();
-
     res.status(201).json({ success: true, data: post });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error adding comment.', error: error.message });
   }
 };
 
-// ─── Mark as Published (manual, paste URL) ─────────────────────────────────
+// --- Mark as Published ---
 exports.markPublished = async (req, res) => {
   try {
     const { url } = req.body;
-
     if (!url || !url.startsWith('http')) {
       return res.status(400).json({ success: false, message: 'A valid URL is required.' });
     }
-
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ success: false, message: 'Post not found.' });
-
     if (post.status !== 'approved') {
       return res.status(400).json({ success: false, message: `Cannot publish post with status "${post.status}". Must be "approved".` });
     }
-
     post.status = 'published';
     post.publishedUrl = url;
     post.publishedAt = new Date();
     await post.save();
-
     res.json({ success: true, data: post });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error marking post as published.', error: error.message });
   }
 };
 
-// ─── Move to Review (from approved / published) ────────────────────────────
+// --- Move to Review ---
 exports.moveToReview = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ success: false, message: 'Post not found.' });
-
     const allowed = ['approved', 'published', 'rejected'];
     if (!allowed.includes(post.status)) {
       return res.status(400).json({
@@ -224,7 +211,6 @@ exports.moveToReview = async (req, res) => {
         message: `Cannot move post with status "${post.status}" back to review. Allowed: ${allowed.join(', ')}.`,
       });
     }
-
     post.status = 'review';
     await post.save();
     res.json({ success: true, data: post });
@@ -233,13 +219,11 @@ exports.moveToReview = async (req, res) => {
   }
 };
 
-
-// ─── Get Analytics ─────────────────────────────────────────────────────────
+// --- Get Analytics ---
 exports.getAnalytics = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ success: false, message: 'Post not found.' });
-
     res.json({
       success: true,
       data: {
