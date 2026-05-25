@@ -16,7 +16,11 @@ const PostSchema = new mongoose.Schema({
     required: [true, 'Thread content array is required'],
   },
   images: {
-    type: [String], // Array of image URLs, one per tweet (empty string if no image)
+    type: [String],
+    default: [],
+  },
+  tags: {
+    type: [String],
     default: [],
   },
   status: {
@@ -48,7 +52,7 @@ const PostSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-// Indexes for efficient lookups
 PostSchema.index({ status: 1, createdAt: -1 });
+PostSchema.index({ tags: 1 });
 
 module.exports = mongoose.model('Post', PostSchema);
