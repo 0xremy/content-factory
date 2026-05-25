@@ -314,6 +314,15 @@ const ContentQueue = () => {
                       {post.title}
                     </h3>
                     <StatusBadge status={post.status} />
+                    {post.tags && post.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {post.tags.map((tag, i) => (
+                          <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-500/15 text-purple-400 border border-purple-500/30">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <p className={`text-dark-400 text-xs leading-relaxed line-clamp-2 mb-4 ${someSelected || selected ? 'pl-6' : ''} transition-all`}>
