@@ -325,11 +325,18 @@ const ContentQueue = () => {
                     <div className="flex items-center gap-3">
                       {post.tags && post.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1">
-                          {post.tags.map((tag, i) => (
-                            <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-500/15 text-purple-400 border border-purple-500/30">
-                              {tag}
-                            </span>
-                          ))}
+                          {post.tags.map((tag, i) => {
+                            const isMorningRun = tag === 'Morning Run';
+                            return (
+                              <span key={i} className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${
+                                isMorningRun
+                                  ? 'bg-orange-500/15 text-orange-400 border-orange-500/30'
+                                  : 'bg-purple-500/15 text-purple-400 border-purple-500/30'
+                              }`}>
+                                {tag}
+                              </span>
+                            );
+                          })}
                         </div>
                       )}
                       {post.comments?.length > 0 && (
