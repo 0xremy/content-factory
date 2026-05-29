@@ -23,7 +23,7 @@ const App = () => {
 
   return (
     <>
-      <Layout onLogout={handleLogout}>
+      <Layout>
         <ContentQueue />
       </Layout>
       <PostModal />
