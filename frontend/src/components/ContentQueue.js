@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Search, LayoutGrid, List, Check, RotateCcw, Ban, Trash2, CheckSquare, Square, X, RefreshCcw } from 'lucide-react';
+import { Search, LayoutGrid, List, Check, RotateCcw, Ban, Trash2, CheckSquare, Square, X, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import usePostStore from '../store/usePostStore';
 import StatusBadge from './StatusBadge';
 import ConfirmModal from './ConfirmModal';
 
 const ContentQueue = () => {
-  const { posts, loading, error, filters, statusCounts, setFilter, fetchPosts, selectPost, approvePost, rejectPost, redoPost, deletePost, moveToReview } = usePostStore();
+  const { posts, loading, error, filters, pagination, statusCounts, setFilter, setPage, fetchPosts, selectPost, approvePost, rejectPost, redoPost, deletePost, moveToReview } = usePostStore();
   const [viewMode, setViewMode] = React.useState('grid');
   const [searchInput, setSearchInput] = React.useState('');
 
@@ -93,6 +93,18 @@ const ContentQueue = () => {
 
   const allSelected = posts.length > 0 && selectedIds.length === posts.length;
   const someSelected = selectedIds.length > 0;
+
+  // Pagination helpers
+  const totalPages = Math.ceil(pagination.total / pagination.limit);
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    let start = Math.max(1, pagination.page - Math.floor(maxVisible / 2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
+    if (end - start < maxVisible - 1) start = Math.max(1, end - maxVisible + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  };
 
   // Show "Move to Review" only when at least one selected post is approved/published/rejected
   const selectedPosts = posts.filter((p) => selectedIds.includes(p._id));
@@ -353,6 +365,49 @@ const ContentQueue = () => {
             })}
           </div>
         </>
+      )}
+
+      {/* ─── Pagination ──────────────────────────────────────────── */}
+      {!loading && totalPages > 1 && (
+        <div className="flex items-center justify-between px-1 py-3 border-t border-dark-700/30">
+          <span className="text-xs text-dark-500">
+            Showing {((pagination.page - 1) * pagination.limit) + 1}–
+            {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} posts
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+              className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-xl bg-dark-800 text-dark-300 hover:text-white hover:bg-dark-700 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft size={14} />
+              Prev
+            </button>
+
+            {getPageNumbers().map((p) => (
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className={`w-8 h-8 text-xs font-medium rounded-lg transition-all ${
+                  p === pagination.page
+                    ? 'bg-dark-700 text-white'
+                    : 'text-dark-400 hover:text-white hover:bg-dark-800'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+
+            <button
+              onClick={() => setPage(pagination.page + 1)}
+              disabled={pagination.page * pagination.limit >= pagination.total}
+              className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-xl bg-dark-800 text-dark-300 hover:text-white hover:bg-dark-700 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Next
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Bulk Delete Confirm Modal */}

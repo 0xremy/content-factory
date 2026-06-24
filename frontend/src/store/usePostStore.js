@@ -13,6 +13,11 @@ const usePostStore = create((set, get) => ({
 
   // ─── Actions ───────────────────────────────────────────────────────────
 
+  setPage: (page) => {
+    set((s) => ({ pagination: { ...s.pagination, page } }));
+    get().fetchPosts();
+  },
+
   setFilter: (key, value) => {
     set((s) => ({ filters: { ...s.filters, [key]: value } }));
     get().fetchPosts();
