@@ -327,11 +327,14 @@ const ContentQueue = () => {
                         <div className="flex flex-wrap gap-1">
                           {post.tags.map((tag, i) => {
                             const isMorningRun = tag === 'Morning Run';
+                            const isGlider = tag === 'Glider';
                             return (
                               <span key={i} className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${
-                                isMorningRun
-                                  ? 'bg-orange-500/15 text-orange-400 border-orange-500/30'
-                                  : 'bg-purple-500/15 text-purple-400 border-purple-500/30'
+                                isGlider
+                                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                                  : isMorningRun
+                                    ? 'bg-orange-500/15 text-orange-400 border-orange-500/30'
+                                    : 'bg-purple-500/15 text-purple-400 border-purple-500/30'
                               }`}>
                                 {tag}
                               </span>
